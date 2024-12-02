@@ -50,7 +50,12 @@
 .auth-container {
     width: 100%;
     max-width: 400px;
+    margin: 0 auto;
     padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 40px);
 }
 
 .auth-card {
@@ -633,6 +638,12 @@ header {
 .auth-container {
     width: 100%;
     max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 40px);
 }
 
 .auth-card {
