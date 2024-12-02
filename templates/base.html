@@ -86,11 +86,13 @@
                             </button>
                             <div class="profile-dropdown">
                                 <ul>
+                                    <li class="greeting"><i class="fas fa-smile"></i> Salam {{ current_user.username }}</li>
                                     <li><a href="{{ url_for('profile') }}"><i class="fas fa-user-circle"></i> Profile</a></li>
                                     {% if current_user.is_admin %}
                                     <li><a href="{{ url_for('manage_users') }}"><i class="fas fa-users"></i> Users</a></li>
                                     {% endif %}
                                     <li><a href="{{ url_for('change_password') }}"><i class="fas fa-key"></i> Change Password</a></li>
+                                    <li class="greeting"></li>
                                     <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                                 </ul>
                             </div>
