@@ -6,7 +6,8 @@
     <div class="add-server-content">
         <h1>Add Server/Device</h1>
         <div class="form-container">
-            <form method="POST" action="{{ url_for('add_server') }}">
+            <form method="POST" action="{{ url_for('add_server') }}" class="add-server-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="form-group">
                     <label for="server-name">Server/Device Name</label>
                     <input type="text" id="server-name" name="server-name" required>

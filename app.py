@@ -1,10 +1,26 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from models import db, User, Device
+from datetime import timedelta
 import os
+from urllib.parse import urlparse
+from flask_wtf.csrf import CSRFProtect
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'  # Change this to a secure secret key
+
+# Initialize CSRF protection
+csrf = CSRFProtect(app)
+
+# Session configuration
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)  # Session expires after 30 minutes
+# Disable secure cookie in development
+if app.debug:
+    app.config['SESSION_COOKIE_SECURE'] = False
+else:
+    app.config['SESSION_COOKIE_SECURE'] = True  # Only send cookies over HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access to session cookie
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Protect against CSRF
 
 # Database configuration
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -24,10 +40,10 @@ def load_user(user_id):
 # Initialize database
 def init_db():
     with app.app_context():
-        db.drop_all()
+        # Only create tables if they don't exist
         db.create_all()
         
-        # Create default admin user
+        # Create default admin user if it doesn't exist
         admin_user = User.query.filter_by(username='admin').first()
         if not admin_user:
             admin = User(
@@ -77,11 +93,24 @@ def notifications():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+        
     if request.method == 'POST':
         user = User.query.filter_by(username=request.form['username']).first()
         if user and user.check_password(request.form['password']):
-            login_user(user)
-            return redirect(url_for('dashboard'))
+            # Set session as permanent but it will expire after PERMANENT_SESSION_LIFETIME
+            session.permanent = True
+            remember = 'remember' in request.form
+            login_user(user, remember=remember)
+            
+            # Get the next page from the URL parameters, defaulting to dashboard
+            next_page = request.args.get('next')
+            if not next_page or urlparse(next_page).netloc != '':
+                next_page = url_for('dashboard')
+                
+            flash('Logged in successfully.', 'success')
+            return redirect(next_page)
         flash('Invalid username or password', 'error')
     return render_template('login.html')
 
@@ -118,6 +147,9 @@ def change_password():
 @login_required
 def logout():
     logout_user()
+    # Clear session
+    session.clear()
+    flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
 # User Management Routes
