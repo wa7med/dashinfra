@@ -1,96 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile - Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <div class="container">
-        <!-- Sidebar -->
-        <nav class="sidebar">
-            <div class="logo">
-                <span>Dashboard</span>
+{% extends "base.html" %}
+
+{% block title %}User Profile - Dashboard{% endblock %}
+
+{% block content %}
+<div class="profile-content">
+    <div class="profile-header">
+        <h1><i class="fas fa-user-circle"></i> User Profile</h1>
+    </div>
+    <div class="profile-card">
+        <div class="profile-info">
+            <div class="info-group">
+                <label>Username</label>
+                <p>{{ current_user.username }}</p>
             </div>
-            <ul class="nav-links">
-                <li>
-                    <a href="{{ url_for('dashboard') }}">
-                        <i class="fas fa-home"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ url_for('add_server') }}">
-                        <i class="fas fa-server"></i>
-                        <span>Add Server/Device</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Header -->
-            <header>
-                <div class="header-content">
-                    <div class="search-bar">
-                        <input type="text" placeholder="Search...">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <div class="header-icons">
-                        <button id="theme-toggle" class="icon-btn">
-                            <i class="fas fa-moon"></i>
-                        </button>
-                        <button class="icon-btn notification-btn">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge">3</span>
-                        </button>
-                        <button class="icon-btn profile-btn">
-                            <i class="fas fa-user"></i>
-                        </button>
-                        <div class="profile-dropdown">
-                            <ul>
-                                <li><a href="{{ url_for('profile') }}"><i class="fas fa-user-circle"></i> Profile</a></li>
-                                <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Profile Content -->
-            <div class="profile-content">
-                <div class="profile-header">
-                    <h1><i class="fas fa-user-circle"></i> User Profile</h1>
-                </div>
-                <div class="profile-card">
-                    <div class="profile-info">
-                        <div class="info-group">
-                            <label>Username</label>
-                            <p>{{ current_user.username }}</p>
-                        </div>
-                        <div class="info-group">
-                            <label>Email</label>
-                            <p>{{ current_user.email }}</p>
-                        </div>
-                        <div class="info-group">
-                            <label>Account Created</label>
-                            <p>{{ current_user.created_at.strftime('%Y-%m-%d') }}</p>
-                        </div>
-                    </div>
-                    <div class="profile-stats">
-                        <div class="stat-card">
-                            <i class="fas fa-server"></i>
-                            <h3>Total Devices</h3>
-                            <p>{{ current_user.devices|length }}</p>
-                        </div>
-                    </div>
-                </div>
+            <div class="info-group">
+                <label>Role</label>
+                <p>{% if current_user.is_admin %}Administrator{% else %}User{% endif %}</p>
+            </div>
+            <div class="info-group">
+                <label>Email</label>
+                <p>{{ current_user.email }}</p>
+            </div>
+            <div class="info-group">
+                <label>Account Created</label>
+                <p>{{ current_user.created_at.strftime('%Y-%m-%d') }}</p>
+            </div>
+        </div>
+        <div class="profile-stats">
+            <div class="stat-card">
+                <i class="fas fa-server"></i>
+                <h3>Total Devices</h3>
+                <p>{{ current_user.devices|length }}</p>
             </div>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
-</html>
+</div>
+{% endblock %}
