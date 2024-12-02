@@ -56,19 +56,15 @@
                 <i class="fas fa-arrow-right"></i>
             </button>
         </form>
-        <div class="auth-footer">
-            <button id="theme-toggle" class="icon-btn" title="Toggle Theme">
-                <i class="fas fa-moon"></i>
-            </button>
-        </div>
     </div>
 </div>
 
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 <script>
-    // Initialize theme on login page
+    // Force light mode on login page
     document.addEventListener('DOMContentLoaded', function() {
-        initializeTheme();
+        document.body.classList.remove('dark-theme');
+        localStorage.setItem('theme', 'light');
     });
 
     // Toggle password visibility
