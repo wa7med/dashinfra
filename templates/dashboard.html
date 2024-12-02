@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-content">
+    <h1>Welcome to Dashboard</h1>
+    <div class="cards-container">
+        <div class="card">
+            <i class="fas fa-server"></i>
+            <h3>Total Servers</h3>
+            <p>25</p>
+        </div>
+        <div class="card">
+            <i class="fas fa-desktop"></i>
+            <h3>Active Devices</h3>
+            <p>18</p>
+        </div>
+        <div class="card">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Alerts</h3>
+            <p>3</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

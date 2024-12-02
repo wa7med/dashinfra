@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        {% if current_user.is_authenticated %}
+        <nav class="sidebar">
+            <div class="logo">
+                <span>Dashboard</span>
+            </div>
+            <ul class="nav-links">
+                <li>
+                    <a href="{{ url_for('dashboard') }}">
+                        <i class="fas fa-home"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('add_server') }}">
+                        <i class="fas fa-server"></i>
+                        <span>Add Server/Device</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            {% if current_user.is_authenticated %}
+            <header>
+                <div class="header-content">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="header-icons">
+                        <button id="theme-toggle" class="icon-btn" title="Toggle Theme">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        <div class="notification-section">
+                            <button class="icon-btn notification-btn" title="Notifications">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge">3</span>
+                            </button>
+                            <div class="notification-dropdown">
+                                <div class="notification-header">
+                                    <h3>Notifications</h3>
+                                </div>
+                                <div class="notification-list">
+                                    <div class="notification-item">
+                                        <i class="fas fa-exclamation-circle text-warning"></i>
+                                        <div class="notification-content">
+                                            <p>Server CPU usage above 90%</p>
+                                            <small>5 minutes ago</small>
+                                        </div>
+                                    </div>
+                                    <div class="notification-item">
+                                        <i class="fas fa-check-circle text-success"></i>
+                                        <div class="notification-content">
+                                            <p>Backup completed successfully</p>
+                                            <small>1 hour ago</small>
+                                        </div>
+                                    </div>
+                                    <div class="notification-item">
+                                        <i class="fas fa-info-circle text-info"></i>
+                                        <div class="notification-content">
+                                            <p>System update available</p>
+                                            <small>2 hours ago</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="profile-section">
+                            <button class="icon-btn profile-btn" title="Profile Menu">
+                                <i class="fas fa-user"></i>
+                            </button>
+                            <div class="profile-dropdown">
+                                <ul>
+                                    <li><a href="{{ url_for('profile') }}"><i class="fas fa-user-circle"></i> Profile</a></li>
+                                    {% if current_user.is_admin %}
+                                    <li><a href="{{ url_for('manage_users') }}"><i class="fas fa-users"></i> Users</a></li>
+                                    {% endif %}
+                                    <li><a href="{{ url_for('change_password') }}"><i class="fas fa-key"></i> Change Password</a></li>
+                                    <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            {% endif %}
+
+            <!-- Main Content Block -->
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
