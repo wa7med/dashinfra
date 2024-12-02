@@ -61,6 +61,47 @@ function showNotification(message, type = 'info') {
     }
 }
 
+function toggleNotifications(event) {
+    if (event) {
+        event.preventDefault();
+    }
+    const dropdown = document.querySelector('.notification-dropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('active');
+        if (dropdown.classList.contains('active')) {
+            fetchNotifications();
+        }
+    }
+}
+
+function fetchNotifications() {
+    fetch('/notifications')
+        .then(response => response.json())
+        .then(notifications => {
+            const container = document.querySelector('.notification-dropdown');
+            if (!container) return;
+
+            // Clear existing notifications except the header
+            const header = container.querySelector('.notification-header');
+            container.innerHTML = '';
+            if (header) container.appendChild(header);
+
+            // Add notifications
+            notifications.forEach(notification => {
+                const notifElement = document.createElement('div');
+                notifElement.className = 'notification-item';
+                notifElement.innerHTML = `
+                    <div class="notification-content">
+                        <p>${notification.message}</p>
+                        <span class="notification-time">${notification.time}</span>
+                    </div>
+                `;
+                container.appendChild(notifElement);
+            });
+        })
+        .catch(error => console.error('Error fetching notifications:', error));
+}
+
 // Active Link Management
 function setActiveLink() {
     const currentPath = window.location.pathname;
@@ -122,12 +163,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Notification Button
+    // Notification button click handler
     const notificationBtn = document.querySelector('.notification-btn');
     if (notificationBtn) {
-        notificationBtn.addEventListener('click', () => {
-            window.location.href = '/notifications';
-        });
+        notificationBtn.addEventListener('click', toggleNotifications);
     }
 
     // IP Address validation

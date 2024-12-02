@@ -67,7 +67,13 @@ def add_server():
 @app.route('/notifications')
 @login_required
 def notifications():
-    return render_template('notifications.html')
+    # Mock notifications data - you can replace this with actual notifications from your database
+    notifications = [
+        {"id": 1, "message": "Welcome to the dashboard!", "time": "Just now"},
+        {"id": 2, "message": "New device added", "time": "2 hours ago"},
+        {"id": 3, "message": "System update available", "time": "1 day ago"}
+    ]
+    return jsonify(notifications)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
