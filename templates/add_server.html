@@ -1,91 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Server/Device</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body>
-    <div class="container">
-        <!-- Sidebar -->
-        <nav class="sidebar">
-            <div class="logo">
-                <span>Dashboard</span>
-            </div>
-            <ul class="nav-links">
-                <li>
-                    <a href="/">
-                        <i class="fas fa-home"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li class="active">
-                    <a href="/add-server">
-                        <i class="fas fa-server"></i>
-                        <span>Add Server/Device</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
+{% extends "base.html" %}
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Header -->
-            <header>
-                <div class="header-content">
-                    <div class="search-bar">
-                        <input type="text" placeholder="Search...">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <div class="header-icons">
-                        <button id="theme-toggle" class="icon-btn">
-                            <i class="fas fa-moon"></i>
-                        </button>
-                        <button class="icon-btn notification-btn">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge">3</span>
-                        </button>
-                        <button class="icon-btn profile-btn">
-                            <i class="fas fa-user"></i>
-                        </button>
-                    </div>
-                </div>
-            </header>
+{% block title %}Add Server/Device{% endblock %}
 
-            <!-- Add Server Form -->
-            <div class="dashboard-content">
-                <h1>Add New Server/Device</h1>
-                <div class="form-container">
-                    <form class="add-server-form">
-                        <div class="form-group">
-                            <label for="server-name">Server/Device Name</label>
-                            <input type="text" id="server-name" name="server-name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="server-ip">IP Address</label>
-                            <input type="text" id="server-ip" name="server-ip" pattern="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$" placeholder="xxx.xxx.xxx.xxx" required>
-                            <span class="ip-validation-message" style="color: red; display: none;">Please enter a valid IP address (format: xxx.xxx.xxx.xxx)</span>
-                        </div>
-                        <div class="form-group">
-                            <label for="server-type">Type</label>
-                            <select id="server-type" name="server-type">
-                                <option value="server">Server</option>
-                                <option value="device">Device</option>
-                                <option value="camera">Camera</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="server-description">Description</label>
-                            <textarea id="server-description" name="server-description"></textarea>
-                        </div>
-                        <button type="submit" class="submit-btn">Add Server/Device</button>
-                    </form>
+{% block content %}
+    <div class="add-server-content">
+        <h1>Add Server/Device</h1>
+        <div class="form-container">
+            <form method="POST" action="{{ url_for('add_server') }}">
+                <div class="form-group">
+                    <label for="server-name">Server/Device Name</label>
+                    <input type="text" id="server-name" name="server-name" required>
                 </div>
-            </div>
+                <div class="form-group">
+                    <label for="server-ip">IP Address</label>
+                    <input type="text" id="server-ip" name="server-ip" pattern="^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$" placeholder="xxx.xxx.xxx.xxx" required>
+                    <span class="ip-validation-message" style="color: red; display: none;">Please enter a valid IP address (format: xxx.xxx.xxx.xxx)</span>
+                </div>
+                <div class="form-group">
+                    <label for="server-type">Type</label>
+                    <select id="server-type" name="server-type">
+                        <option value="server">Server</option>
+                        <option value="device">Device</option>
+                        <option value="camera">Camera</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="server-description">Description</label>
+                    <textarea id="server-description" name="server-description"></textarea>
+                </div>
+                <button type="submit" class="submit-btn">Add Server/Device</button>
+            </form>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
-</html>
+{% endblock %}
