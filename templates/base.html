@@ -6,12 +6,46 @@
     <title>{% block title %}DashInfra{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Sidebar styles */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #4CAF50;
+            color: white;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .dark-theme .sidebar {
+            background-color: #2e7d32;
+        }
+
+        /* Main content styles */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            min-height: 100vh;
+            transition: margin-left 0.3s;
+        }
+
+        /* When sidebar is collapsed */
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .main-content.expanded {
+            margin-left: 60px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <!-- Sidebar -->
         {% if current_user.is_authenticated %}
-        <nav class="sidebar">
+        <div class="sidebar">
             <div class="logo">
                 <span>DashInfra</span>
             </div>
@@ -29,10 +63,8 @@
                     </a>
                 </li>
             </ul>
-        </nav>
+        </div>
         {% endif %}
-
-        <!-- Main Content -->
         <div class="main-content">
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
