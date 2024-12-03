@@ -700,32 +700,35 @@ header {
 }
 
 /* Auth Pages Styles */
-.auth-page {
+.auth-wrapper {
     min-height: 100vh;
     display: flex;
-    align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #4CAF50 0%, #2c3e50 100%);
+    align-items: center;
+    background: var(--bg-color);
     padding: 20px;
+}
+
+.dark-theme .auth-wrapper {
+    background: var(--dark-bg);
 }
 
 .auth-container {
     width: 100%;
     max-width: 400px;
     margin: 0 auto;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: calc(100vh - 40px);
 }
 
 .auth-card {
-    background-color: var(--card-bg);
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    padding: 40px;
-    text-align: center;
+    background: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+    padding: 2rem;
+}
+
+.dark-theme .auth-card {
+    background: var(--dark-card-bg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .auth-header {
@@ -917,6 +920,15 @@ header {
     margin: 0;
     font-size: 24px;
     color: #333;
+    margin-bottom: 1rem;
+}
+
+.dark-theme .content-header h1 {
+    color: #ecf0f1;
+}
+
+.dark-theme .content-header {
+    color: #ecf0f1;
 }
 
 .devices-section {
