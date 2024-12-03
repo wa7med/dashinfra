@@ -409,6 +409,46 @@ def reset_user_password():
     flash('Password reset successfully', 'success')
     return redirect(url_for('users'))
 
+# Health check endpoints
+@app.route('/health')
+def health_check():
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': datetime.utcnow().isoformat(),
+        'database': check_db_connection(),
+        'redis': check_redis_connection()
+    })
+
+@app.route('/health/db')
+def db_health():
+    return jsonify({
+        'status': 'healthy' if check_db_connection() else 'unhealthy',
+        'timestamp': datetime.utcnow().isoformat()
+    })
+
+@app.route('/health/redis')
+def redis_health():
+    return jsonify({
+        'status': 'healthy' if check_redis_connection() else 'unhealthy',
+        'timestamp': datetime.utcnow().isoformat()
+    })
+
+def check_db_connection():
+    try:
+        db.session.execute('SELECT 1')
+        return True
+    except Exception:
+        return False
+
+def check_redis_connection():
+    try:
+        from flask_caching import Cache
+        cache = Cache(app)
+        cache.get('health_check')
+        return True
+    except Exception:
+        return False
+
 if __name__ == '__main__':
     init_db()
     app.run(debug=True)

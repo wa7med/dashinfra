@@ -1,53 +1,52 @@
-# 2048 Dashboard
+# 2048 Web Dashboard
 
-A modern web-based dashboard for monitoring and managing servers and devices. Built with Flask and SQLAlchemy, featuring a responsive design that works seamlessly in both light and dark modes.
+A modern web-based dashboard for managing devices and servers, built with Flask and PostgreSQL.
 
 ## Features
 
-- **User Authentication**
-  - Secure login system with Flask-Login
-  - Role-based access control (Admin/User)
-  - Password change functionality
-  - User profile management
+- User Authentication and Authorization
+- Device Management System
+- Real-time Activity Monitoring
+- Responsive Design
+- Dark/Light Theme Support
+- Pagination Support
+- Secure Password Management
+- Docker Support
 
-- **Device Management**
-  - Add and monitor servers and devices
-  - Real-time status tracking
-  - Device categorization (server, device, camera)
-  - Detailed device information display
+## Prerequisites
 
-- **Dashboard Interface**
-  - Modern, responsive design
-  - Dark/Light theme toggle
-  - Real-time notifications system
-  - Search functionality
-  - User-friendly navigation
+- Docker and Docker Compose
+- PostgreSQL 13+
+- Python 3.11+
+- Redis (optional, for caching)
 
-- **Admin Features**
-  - User management
-  - System-wide monitoring
-  - Administrative controls
-
-## Technology Stack
-
-- **Backend**
-  - Python 3.x
-  - Flask (Web Framework)
-  - SQLAlchemy (Database ORM)
-  - Flask-Login (Authentication)
-
-- **Frontend**
-  - HTML5/CSS3
-  - JavaScript
-  - Font Awesome Icons
-  - Responsive Design
-
-## Installation
+## Quick Start with Docker
 
 1. Clone the repository:
 ```bash
 git clone https://github.com/yourusername/2048-dashboard.git
 cd 2048-dashboard
+```
+
+2. Create a .env file:
+```bash
+cp .env.example .env
+# Edit .env with your configurations
+```
+
+3. Build and run with Docker Compose:
+```bash
+docker-compose up --build
+```
+
+The application will be available at http://localhost:5000
+
+## Manual Installation
+
+1. Create a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
 2. Install dependencies:
@@ -65,38 +64,50 @@ flask db upgrade
 flask run
 ```
 
-## Configuration
+## Environment Variables
 
-The application can be configured through environment variables or a `.env` file:
+- `FLASK_APP`: Application entry point
+- `FLASK_ENV`: Environment (development/production)
+- `DATABASE_URL`: PostgreSQL connection string
+- `SECRET_KEY`: Flask secret key
+- `REDIS_URL`: Redis connection string (optional)
+- `MAIL_SERVER`: SMTP server for emails
+- `MAIL_PORT`: SMTP port
+- `MAIL_USERNAME`: SMTP username
+- `MAIL_PASSWORD`: SMTP password
 
-- `FLASK_APP`: Set to `app.py`
-- `FLASK_ENV`: `development` or `production`
-- `SECRET_KEY`: Your secret key for session management
-- `DATABASE_URL`: Your database connection string
+## Docker Deployment
 
-## Usage
+1. Build the image:
+```bash
+docker build -t yourusername/2048-dashboard:latest .
+```
 
-1. Access the application at `http://localhost:5000`
-2. Login with your credentials
-3. Navigate through the dashboard using the sidebar
-4. Add and monitor devices as needed
-5. Use the theme toggle for comfortable viewing in any lighting condition
-
-## Security
-
-- Password hashing using Werkzeug
-- Session management with Flask-Login
-- CSRF protection
-- Role-based access control
+2. Push to Docker Hub:
+```bash
+docker push yourusername/2048-dashboard:latest
+```
 
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Security
+
+- All passwords are hashed using strong algorithms
+- CSRF protection enabled
+- Input validation and sanitization
+- Secure session management
+- Environment variable management for sensitive data
+
+## Support
+
+For support, please open an issue in the GitHub repository.
