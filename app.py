@@ -205,8 +205,13 @@ def change_password():
             db.session.commit()
             return redirect(url_for('dashboard'))
             
+        current_password = request.form.get('current_password')
         new_password = request.form.get('new_password')
         confirm_password = request.form.get('confirm_password')
+        
+        if not current_user.check_password(current_password):
+            flash('Current password is incorrect!', 'error')
+            return redirect(url_for('change_password'))
         
         if new_password != confirm_password:
             flash('Passwords do not match!', 'error')
