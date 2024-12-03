@@ -44,6 +44,11 @@
         .add-server-content {
             padding: 20px;
         }
+
+        .dark-theme .section-header h1 {
+            color: #ecf0f1;
+        }
+
         .form-container {
             max-width: 600px;
             margin: 20px auto;
@@ -52,14 +57,27 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
+        .dark-theme .form-container {
+            background: #2d3436;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         .form-group label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
+            color: #495057;
         }
+
+        .dark-theme .form-group label {
+            color: #ecf0f1;
+        }
+
         .form-group input,
         .form-group select,
         .form-group textarea {
@@ -67,11 +85,36 @@
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            background-color: white;
+            color: #495057;
         }
+
+        .dark-theme .form-group input,
+        .dark-theme .form-group select,
+        .dark-theme .form-group textarea {
+            background-color: #343a40;
+            border-color: #495057;
+            color: #ecf0f1;
+        }
+
+        .dark-theme .form-group input:focus,
+        .dark-theme .form-group select:focus,
+        .dark-theme .form-group textarea:focus {
+            border-color: #64b5f6;
+            box-shadow: 0 0 0 0.2rem rgba(100, 181, 246, 0.25);
+            outline: none;
+        }
+
+        .dark-theme .form-group input::placeholder,
+        .dark-theme .form-group textarea::placeholder {
+            color: #6c757d;
+        }
+
         .form-actions {
             margin-top: 20px;
             text-align: right;
         }
+
         .submit-btn {
             background-color: #4CAF50;
             color: white;
@@ -79,24 +122,73 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.2s;
         }
+
         .submit-btn:hover {
             background-color: #45a049;
         }
+
+        .dark-theme .submit-btn {
+            background-color: #2e7d32;
+        }
+
+        .dark-theme .submit-btn:hover {
+            background-color: #388e3c;
+        }
+
         .alert {
             padding: 10px;
             margin: 10px 0;
             border-radius: 4px;
         }
+
         .alert-success {
             background-color: #dff0d8;
             border-color: #d6e9c6;
             color: #3c763d;
         }
+
+        .dark-theme .alert-success {
+            background-color: #1b5e20;
+            border-color: #2e7d32;
+            color: #a5d6a7;
+        }
+
         .alert-error {
             background-color: #f2dede;
             border-color: #ebccd1;
             color: #a94442;
+        }
+
+        .dark-theme .alert-error {
+            background-color: #c62828;
+            border-color: #d32f2f;
+            color: #ef9a9a;
+        }
+
+        .ip-validation-message {
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        .dark-theme .ip-validation-message {
+            color: #ef9a9a;
+        }
+
+        /* Dark mode select dropdown options */
+        .dark-theme .form-group select option {
+            background-color: #343a40;
+            color: #ecf0f1;
+        }
+
+        /* Dark mode autofill styles */
+        .dark-theme .form-group input:-webkit-autofill,
+        .dark-theme .form-group input:-webkit-autofill:hover,
+        .dark-theme .form-group input:-webkit-autofill:focus {
+            -webkit-text-fill-color: #ecf0f1;
+            -webkit-box-shadow: 0 0 0px 1000px #343a40 inset;
+            transition: background-color 5000s ease-in-out 0s;
         }
     </style>
 {% endblock %}
