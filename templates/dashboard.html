@@ -36,64 +36,255 @@
         </div>
     </div>
 
-    <div class="devices-table">
-        <h2>Devices List</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>IP Address</th>
-                    <th>Status</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for device in devices %}
-                <tr>
-                    <td>{{ device.name }}</td>
-                    <td>{{ device.device_type }}</td>
-                    <td>{{ device.ip_address }}</td>
-                    <td>{{ device.status }}</td>
-                    <td>{{ device.description }}</td>
-                    <td class="actions">
-                        <button class="icon-btn edit-btn" onclick="editDevice('{{ device.id }}')">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="icon-btn delete-btn" onclick="deleteDevice('{{ device.id }}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="devices-section">
+        <div class="section-header">
+            <h2>Devices List</h2>
+            <a href="{{ url_for('add_server') }}" class="add-device-btn">
+                <i class="fas fa-plus"></i> Add Device
+            </a>
+        </div>
+        <div class="devices-table-wrapper">
+            <table class="devices-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>IP Address</th>
+                        <th>Status</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for device in devices %}
+                    <tr>
+                        <td>
+                            <div class="device-name">
+                                {% if device.device_type == 'server' %}
+                                    <i class="fas fa-server device-icon"></i>
+                                {% elif device.device_type == 'camera' %}
+                                    <i class="fas fa-video device-icon"></i>
+                                {% else %}
+                                    <i class="fas fa-desktop device-icon"></i>
+                                {% endif %}
+                                {{ device.name }}
+                            </div>
+                        </td>
+                        <td><span class="device-type {{ device.device_type }}">{{ device.device_type }}</span></td>
+                        <td><span class="ip-address">{{ device.ip_address }}</span></td>
+                        <td>
+                            <span class="status-badge {{ device.status }}">
+                                <i class="fas fa-circle"></i>
+                                {{ device.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="description-cell">
+                                {{ device.description if device.description else '-' }}
+                            </div>
+                        </td>
+                        <td class="actions">
+                            <button class="icon-btn edit-btn" onclick="editDevice('{{ device.id }}')" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="icon-btn delete-btn" onclick="deleteDevice('{{ device.id }}')" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
-<script>
-function deleteDevice(deviceId) {
-    if (confirm('Are you sure you want to delete this device?')) {
-        fetch(`/device/${deviceId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token() }}'
+    <style>
+        .devices-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            padding: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .add-device-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .add-device-btn:hover {
+            background-color: #45a049;
+        }
+
+        .devices-table-wrapper {
+            overflow-x: auto;
+        }
+
+        .devices-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 0;
+        }
+
+        .devices-table th {
+            background-color: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .devices-table td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+
+        .devices-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .device-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .device-icon {
+            color: #6c757d;
+        }
+
+        .device-type {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .device-type.server {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .device-type.camera {
+            background-color: #fce4ec;
+            color: #c2185b;
+        }
+
+        .device-type.device {
+            background-color: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .ip-address {
+            font-family: monospace;
+            color: #495057;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+        }
+
+        .status-badge.active {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-badge.inactive {
+            background-color: #fafafa;
+            color: #616161;
+        }
+
+        .status-badge i {
+            font-size: 0.8em;
+        }
+
+        .description-cell {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .actions {
+            white-space: nowrap;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            padding: 6px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            color: #6c757d;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .edit-btn:hover {
+            color: #007bff;
+        }
+
+        .delete-btn:hover {
+            color: #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .devices-table th:nth-child(4),
+            .devices-table td:nth-child(4),
+            .devices-table th:nth-child(5),
+            .devices-table td:nth-child(5) {
+                display: none;
             }
-        })
-        .then(response => {
-            if (response.ok) {
-                window.location.reload();
-            } else {
-                alert('Error deleting device');
-            }
-        });
+        }
+    </style>
+
+    <script>
+    function deleteDevice(deviceId) {
+        if (confirm('Are you sure you want to delete this device?')) {
+            fetch(`/device/${deviceId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Error deleting device');
+                }
+            });
+        }
     }
-}
 
-function editDevice(deviceId) {
-    window.location.href = `/edit-device/${deviceId}`;
-}
-</script>
+    function editDevice(deviceId) {
+        window.location.href = `/edit-device/${deviceId}`;
+    }
+    </script>
+</div>
 {% endblock %}
