@@ -79,8 +79,18 @@ with app.app_context():
 @app.route('/')
 @login_required
 def dashboard():
-    devices = Device.query.filter_by(user_id=current_user.id).all()
-    return render_template('dashboard.html', devices=devices)
+    # Get all devices for everyone
+    devices = Device.query.all()
+    
+    # Get a dictionary of usernames for all device owners
+    user_ids = {device.user_id for device in devices}
+    users = User.query.filter(User.id.in_(user_ids)).all()
+    user_dict = {user.id: user.username for user in users}
+    
+    return render_template('dashboard.html', 
+                         devices=devices, 
+                         user_dict=user_dict, 
+                         current_user=current_user)
 
 class AddServerForm(FlaskForm):
     server_name = StringField('Server Name', validators=[DataRequired()], name='server-name')
