@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 from flask_wtf.csrf import CSRFProtect
 from flask_wtf import FlaskForm
 from dotenv import load_dotenv
-from wtforms import StringField, SelectField, TextAreaField
+from wtforms import StringField, SelectField, TextAreaField, PasswordField
 from wtforms.validators import DataRequired
 
 # Load environment variables
@@ -106,6 +106,8 @@ class AddServerForm(FlaskForm):
                                    ('camera', 'Camera')],
                             validators=[DataRequired()],
                             name='server-type')
+    username = StringField('Username', name='username')
+    password = PasswordField('Password', name='password')
     server_description = TextAreaField('Server Description', name='server-description')
 
 @app.route('/add-server', methods=['GET', 'POST'])
@@ -124,6 +126,8 @@ def add_server():
                     ip_address=request.form['server-ip'],
                     device_type=request.form['server-type'],
                     description=request.form['server-description'],
+                    username=request.form.get('username', ''),
+                    password=request.form.get('password', ''),
                     user_id=current_user.id,
                     status='active',
                     created_at=current_time,
