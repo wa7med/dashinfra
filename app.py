@@ -9,6 +9,7 @@ from flask_wtf import FlaskForm
 from dotenv import load_dotenv
 from wtforms import StringField, SelectField, TextAreaField, PasswordField
 from wtforms.validators import DataRequired
+from flask_migrate import Migrate
 
 # Load environment variables
 load_dotenv()
@@ -41,6 +42,7 @@ app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
 
 # Initialize extensions
 db.init_app(app)
+migrate = Migrate(app, db)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -120,34 +122,42 @@ def add_server():
         if form.validate_on_submit():
             try:
                 current_time = datetime.utcnow()
-                # Create new device
-                new_device = Device(
-                    name=request.form['server-name'],
-                    ip_address=request.form['server-ip'],
-                    device_type=request.form['server-type'],
-                    description=request.form['server-description'],
-                    username=request.form.get('username', ''),
-                    password=request.form.get('password', ''),
-                    user_id=current_user.id,
-                    status='active',
-                    created_at=current_time,
-                    updated_at=current_time
-                )
-                print("Adding device to session")
+                device_data = {
+                    'name': request.form['server-name'],
+                    'ip_address': request.form['server-ip'],
+                    'device_type': request.form['server-type'],
+                    'description': request.form['server-description'],
+                    'username': request.form.get('username', ''),
+                    'password': request.form.get('password', ''),
+                    'user_id': current_user.id,
+                    'status': 'active',
+                    'created_at': current_time,
+                    'updated_at': current_time
+                }
+                print("Attempting to create device with data:", device_data)
+                
+                new_device = Device(**device_data)
+                print("Device object created")
+                
                 db.session.add(new_device)
-                print("Committing to database")
+                print("Device added to session")
+                
                 db.session.commit()
-                print("Device added successfully with ID:", new_device.id)
+                print("Database commit successful")
+                
                 log_activity(current_user, f"Added device {new_device.name}")
                 flash('Device added successfully!', 'success')
                 return redirect(url_for('dashboard'))
             except Exception as e:
-                print("Error occurred:", str(e))
+                import traceback
+                print("Error details:", str(e))
+                print("Full traceback:")
+                traceback.print_exc()
                 db.session.rollback()
-                flash('Error adding device. Please try again.', 'error')
+                flash(f'Error adding device: {str(e)}', 'error')
                 return redirect(url_for('add_server'))
         else:
-            print("Form validation failed:", form.errors)
+            print("Form validation errors:", form.errors)
             flash('Form validation failed. Please check your inputs.', 'error')
     
     return render_template('add_server.html', form=form)
