@@ -1,13 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from models import db, User, Device
-from datetime import timedelta
+from datetime import datetime, timedelta
 import os
 from urllib.parse import urlparse
 from flask_wtf.csrf import CSRFProtect
+from flask_wtf import FlaskForm
+from dotenv import load_dotenv
+from wtforms import StringField, SelectField, TextAreaField
+from wtforms.validators import DataRequired
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-here'  # Change this to a secure secret key
+app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-here')
 
 # Initialize CSRF protection
 csrf = CSRFProtect(app)
@@ -23,9 +30,14 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access to ses
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Protect against CSRF
 
 # Database configuration
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'dashboard.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:password@localhost:5432/dashinfra'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_size': 5,
+    'max_overflow': 10,
+    'pool_timeout': 30
+}
 
 # Initialize extensions
 db.init_app(app)
@@ -40,12 +52,13 @@ def load_user(user_id):
 # Initialize database
 def init_db():
     with app.app_context():
-        # Only create tables if they don't exist
+        # Create all tables
         db.create_all()
         
-        # Create default admin user if it doesn't exist
+        # Check if admin user exists
         admin_user = User.query.filter_by(username='admin').first()
         if not admin_user:
+            # Create admin user
             admin = User(
                 username='admin',
                 email='admin@example.com',
@@ -54,7 +67,13 @@ def init_db():
             admin.set_password('admin')
             db.session.add(admin)
             db.session.commit()
-            print("Default admin user created!")
+            print("Admin user created successfully")
+        else:
+            print("Admin user already exists")
+
+# Make sure tables are created when the app starts
+with app.app_context():
+    db.create_all()
 
 # Routes
 @app.route('/')
@@ -63,22 +82,70 @@ def dashboard():
     devices = Device.query.filter_by(user_id=current_user.id).all()
     return render_template('dashboard.html', devices=devices)
 
+class AddServerForm(FlaskForm):
+    server_name = StringField('Server Name', validators=[DataRequired()], name='server-name')
+    server_ip = StringField('Server IP', validators=[DataRequired()], name='server-ip')
+    server_type = SelectField('Server Type', 
+                            choices=[('server', 'Server'), 
+                                   ('device', 'Device'), 
+                                   ('camera', 'Camera')],
+                            validators=[DataRequired()],
+                            name='server-type')
+    server_description = TextAreaField('Server Description', name='server-description')
+
 @app.route('/add-server', methods=['GET', 'POST'])
 @login_required
 def add_server():
+    form = AddServerForm()
     if request.method == 'POST':
-        new_device = Device(
-            name=request.form['server-name'],
-            ip_address=request.form['server-ip'],
-            device_type=request.form['server-type'],
-            description=request.form['server-description'],
-            user_id=current_user.id
-        )
-        db.session.add(new_device)
+        print("POST request received")
+        print("Form data:", request.form)
+        if form.validate_on_submit():
+            try:
+                current_time = datetime.utcnow()
+                # Create new device
+                new_device = Device(
+                    name=request.form['server-name'],
+                    ip_address=request.form['server-ip'],
+                    device_type=request.form['server-type'],
+                    description=request.form['server-description'],
+                    user_id=current_user.id,
+                    status='active',
+                    created_at=current_time,
+                    updated_at=current_time
+                )
+                print("Adding device to session")
+                db.session.add(new_device)
+                print("Committing to database")
+                db.session.commit()
+                print("Device added successfully with ID:", new_device.id)
+                flash('Device added successfully!', 'success')
+                return redirect(url_for('dashboard'))
+            except Exception as e:
+                print("Error occurred:", str(e))
+                db.session.rollback()
+                flash('Error adding device. Please try again.', 'error')
+                return redirect(url_for('add_server'))
+        else:
+            print("Form validation failed:", form.errors)
+            flash('Form validation failed. Please check your inputs.', 'error')
+    
+    return render_template('add_server.html', form=form)
+
+@app.route('/device/<int:device_id>', methods=['DELETE'])
+@login_required
+def delete_device(device_id):
+    try:
+        device = Device.query.get_or_404(device_id)
+        if device.user_id != current_user.id:
+            return jsonify({'error': 'Unauthorized'}), 403
+        
+        db.session.delete(device)
         db.session.commit()
-        flash('Device added successfully!', 'success')
-        return redirect(url_for('dashboard'))
-    return render_template('add_server.html')
+        return jsonify({'message': 'Device deleted successfully'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/notifications')
 @login_required
@@ -160,7 +227,8 @@ def manage_users():
         flash('Access denied. Admin privileges required.', 'error')
         return redirect(url_for('dashboard'))
     users = User.query.all()
-    return render_template('users.html', users=users)
+    form = FlaskForm()  # Create a form instance for CSRF token
+    return render_template('users.html', users=users, form=form)
 
 @app.route('/users/add', methods=['POST'])
 @login_required

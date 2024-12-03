@@ -177,10 +177,14 @@ document.addEventListener('DOMContentLoaded', function() {
         ipInput.addEventListener('input', function() {
             const ipPattern = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
             if (!ipPattern.test(this.value)) {
-                ipValidationMessage.style.display = 'block';
+                if (ipValidationMessage) {
+                    ipValidationMessage.style.display = 'block';
+                }
                 this.setCustomValidity('Invalid IP address format');
             } else {
-                ipValidationMessage.style.display = 'none';
+                if (ipValidationMessage) {
+                    ipValidationMessage.style.display = 'none';
+                }
                 this.setCustomValidity('');
             }
         });
@@ -190,21 +194,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const addServerForm = document.querySelector('.add-server-form');
     if (addServerForm) {
         addServerForm.addEventListener('submit', function(e) {
-            e.preventDefault();
             const formData = new FormData(this);
             const data = Object.fromEntries(formData);
             
             // Validate IP address
             const ipPattern = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
             if (!ipPattern.test(data['server-ip'])) {
+                e.preventDefault();
                 alert('Please enter a valid IP address');
                 return;
             }
-
-            // Here you would typically send the data to your server
+            
+            // Let the form submit naturally to the server
             console.log('Form submitted with data:', data);
-            alert('Server/Device added successfully!');
-            this.reset();
         });
     }
 });
