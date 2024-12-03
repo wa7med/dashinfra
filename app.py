@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
-from flask_login import LoginManager, current_user, login_user, logout_user, login_required
-from models import db, User, Device
+from flask_login import LoginManager, current_user, login_user, logout_user, login_required, AnonymousUserMixin
+from models import db, User, Device, Activity
 from datetime import datetime, timedelta
 import os
 from urllib.parse import urlparse
@@ -75,6 +75,11 @@ def init_db():
 with app.app_context():
     db.create_all()
 
+def log_activity(user, action):
+    activity = Activity(user_id=user.id, action=action)
+    db.session.add(activity)
+    db.session.commit()
+
 # Routes
 @app.route('/')
 @login_required
@@ -129,6 +134,7 @@ def add_server():
                 print("Committing to database")
                 db.session.commit()
                 print("Device added successfully with ID:", new_device.id)
+                log_activity(current_user, f"Added device {new_device.name}")
                 flash('Device added successfully!', 'success')
                 return redirect(url_for('dashboard'))
             except Exception as e:
@@ -152,6 +158,7 @@ def delete_device(device_id):
         
         db.session.delete(device)
         db.session.commit()
+        log_activity(current_user, f"Deleted device {device.name}")
         return jsonify({'message': 'Device deleted successfully'}), 200
     except Exception as e:
         db.session.rollback()
@@ -186,6 +193,7 @@ def login():
             if not next_page or urlparse(next_page).netloc != '':
                 next_page = url_for('dashboard')
                 
+            log_activity(user, "Logged in")
             flash('Logged in successfully.', 'success')
             return redirect(next_page)
         flash('Invalid username or password', 'error')
@@ -220,6 +228,7 @@ def change_password():
         current_user.set_password(new_password)
         current_user.password_change_required = False
         db.session.commit()
+        log_activity(current_user, "Changed password")
         flash('Password updated successfully!', 'success')
         return redirect(url_for('dashboard'))
         
@@ -228,13 +237,14 @@ def change_password():
 @app.route('/logout')
 @login_required
 def logout():
+    # Log the activity before logging out
+    if not isinstance(current_user, AnonymousUserMixin):
+        log_activity(current_user, 'Logged out')
+    
     # Remove the remember me cookie
     session.pop('remember_token', None)
     # Logout the user
     logout_user()
-    # Clear all session data
-    session.clear()
-    # Remove any remember cookies
     flash('You have been logged out.', 'info')
     response = redirect(url_for('login'))
     response.delete_cookie('remember_token')
@@ -268,6 +278,7 @@ def edit_device(device_id):
             device.updated_at = datetime.utcnow()
             
             db.session.commit()
+            log_activity(current_user, f"Updated device {device.name}")
             flash('Device updated successfully!', 'success')
             return redirect(url_for('dashboard'))
         except Exception as e:
@@ -276,6 +287,12 @@ def edit_device(device_id):
             flash('Error updating device. Please try again.', 'error')
     
     return render_template('edit_device.html', form=form, device=device)
+
+@app.route('/activity-history')
+@login_required
+def activity_history():
+    activities = Activity.query.order_by(Activity.timestamp.desc()).all()
+    return render_template('activity_history.html', activities=activities)
 
 # User Management Routes
 @app.route('/users')
@@ -306,7 +323,7 @@ def add_user():
     new_user.set_password(password)
     db.session.add(new_user)
     db.session.commit()
-    
+    log_activity(current_user, f"Added user {new_user.username}")
     flash('User added successfully', 'success')
     return redirect(url_for('manage_users'))
 
@@ -322,6 +339,7 @@ def delete_user(user_id):
     
     db.session.delete(user)
     db.session.commit()
+    log_activity(current_user, f"Deleted user {user.username}")
     return jsonify({'message': 'User deleted successfully'})
 
 @app.route('/users/reset-password', methods=['POST'])
@@ -336,7 +354,7 @@ def reset_user_password():
     user = User.query.get_or_404(user_id)
     user.set_password(new_password)
     db.session.commit()
-    
+    log_activity(current_user, f"Reset password for user {user.username}")
     flash('Password reset successfully', 'success')
     return redirect(url_for('manage_users'))
 

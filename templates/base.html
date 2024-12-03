@@ -51,9 +51,15 @@
             </div>
             <ul class="nav-links">
                 <li>
-                    <a href="{{ url_for('dashboard') }}">
-                        <i class="fas fa-home"></i>
+                    <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                        <i class="fas fa-tachometer-alt"></i>
                         <span>Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('activity_history') }}" class="nav-link {% if request.endpoint == 'activity_history' %}active{% endif %}">
+                        <i class="fas fa-history"></i>
+                        <span>Activity History</span>
                     </a>
                 </li>
                 <li>
