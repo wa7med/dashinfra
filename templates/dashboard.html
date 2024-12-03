@@ -52,6 +52,7 @@
                         <th>IP Address</th>
                         <th>Status</th>
                         <th>Description</th>
+                        <th>Owner</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -83,13 +84,21 @@
                                 {{ device.description if device.description else '-' }}
                             </div>
                         </td>
+                        <td>
+                            <span class="owner-badge {% if device.user_id == current_user.id %}owner-self{% endif %}">
+                                <i class="fas fa-user"></i>
+                                {{ user_dict[device.user_id] }}
+                            </span>
+                        </td>
                         <td class="actions">
-                            <button class="icon-btn edit-btn" onclick="editDevice('{{ device.id }}')" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="icon-btn delete-btn" onclick="deleteDevice('{{ device.id }}')" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            {% if device.user_id == current_user.id or current_user.is_admin %}
+                                <button class="icon-btn edit-btn" onclick="editDevice('{{ device.id }}')" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="icon-btn delete-btn" onclick="deleteDevice('{{ device.id }}')" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -250,6 +259,26 @@
 
         .delete-btn:hover {
             color: #dc3545;
+        }
+
+        .owner-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .owner-badge.owner-self {
+            background-color: #fff3e0;
+            color: #e65100;
+        }
+
+        .owner-badge i {
+            font-size: 0.8em;
         }
 
         @media (max-width: 768px) {
