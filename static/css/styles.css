@@ -234,7 +234,7 @@ body {
 /* Sidebar */
 .sidebar {
     width: 250px;
-    background-color: #4CAF50;
+    background: linear-gradient(135deg, #4CAF50 0%, #2980b9 100%);
     padding: 20px;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -413,7 +413,10 @@ header {
 .card i {
     font-size: 2em;
     margin-bottom: 10px;
-    color: #4CAF50;
+    background: linear-gradient(135deg, #4CAF50 0%, #2980b9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .card h3 {
@@ -532,7 +535,7 @@ header {
 }
 
 .submit-btn {
-    background-color: #4CAF50;
+    background: linear-gradient(135deg, #4CAF50 0%, #2980b9 100%);
     color: white;
     border: none;
     padding: 10px 20px;
@@ -540,10 +543,11 @@ header {
     cursor: pointer;
     font-size: 16px;
     width: 100%;
+    transition: opacity 0.3s ease;
 }
 
 .submit-btn:hover {
-    background-color: #45a049;
+    opacity: 0.9;
 }
 
 /* Notifications Styles */
@@ -605,10 +609,27 @@ header {
 }
 
 .profile-card {
-    background-color: var(--card-bg);
+    background: var(--card-bg);
     border-radius: 10px;
-    padding: 30px;
+    padding: 20px;
+    margin-bottom: 20px;
     box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.profile-card i {
+    font-size: 24px;
+    margin-right: 10px;
+    background: linear-gradient(135deg, #4CAF50 0%, #2980b9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .profile-info {
@@ -631,17 +652,34 @@ header {
     font-size: 16px;
 }
 
+.info-group i {
+    font-size: 18px;
+    margin-right: 10px;
+    background: linear-gradient(135deg, #4CAF50 0%, #2980b9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
 .profile-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
 }
 
-.stat-card {
-    background-color: var(--secondary-color);
+.profile-stats .stat-card {
+    background: var(--card-bg);
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 10px;
     text-align: center;
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-stats .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .stat-card i {
@@ -1182,4 +1220,27 @@ header {
         transform: translateY(0);
         opacity: 1;
     }
+}
+
+/* Add Device Button */
+.add-device-btn {
+    background: linear-gradient(135deg, #4CAF50 0%, #2980b9 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.add-device-btn:hover {
+    opacity: 0.9;
+}
+
+.add-device-btn i {
+    margin-right: 4px;
 }
