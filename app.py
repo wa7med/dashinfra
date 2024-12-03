@@ -229,6 +229,43 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
+@app.route('/edit-device/<int:device_id>', methods=['GET', 'POST'])
+@login_required
+def edit_device(device_id):
+    device = Device.query.get_or_404(device_id)
+    
+    # Check if user has permission to edit this device
+    if not current_user.is_admin and device.user_id != current_user.id:
+        flash('You do not have permission to edit this device.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    form = AddServerForm()
+    
+    if request.method == 'GET':
+        # Pre-fill the form with device data
+        form.server_name.data = device.name
+        form.server_ip.data = device.ip_address
+        form.server_type.data = device.device_type
+        form.server_description.data = device.description
+    
+    if request.method == 'POST' and form.validate_on_submit():
+        try:
+            device.name = request.form['server-name']
+            device.ip_address = request.form['server-ip']
+            device.device_type = request.form['server-type']
+            device.description = request.form['server-description']
+            device.updated_at = datetime.utcnow()
+            
+            db.session.commit()
+            flash('Device updated successfully!', 'success')
+            return redirect(url_for('dashboard'))
+        except Exception as e:
+            print("Error occurred:", str(e))
+            db.session.rollback()
+            flash('Error updating device. Please try again.', 'error')
+    
+    return render_template('edit_device.html', form=form, device=device)
+
 # User Management Routes
 @app.route('/users')
 @login_required
