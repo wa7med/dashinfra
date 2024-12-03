@@ -86,17 +86,39 @@ def log_activity(user, action):
 @app.route('/')
 @login_required
 def dashboard():
-    # Get all devices for everyone
-    devices = Device.query.all()
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+
+    # Get total counts (not paginated)
+    if current_user.is_admin:
+        total_devices = Device.query.filter_by(device_type='server').count()
+        total_active = Device.query.filter_by(status='active').count()
+        total_cameras = Device.query.filter_by(device_type='camera').count()
+    else:
+        total_devices = Device.query.filter_by(user_id=current_user.id, device_type='server').count()
+        total_active = Device.query.filter_by(user_id=current_user.id, status='active').count()
+        total_cameras = Device.query.filter_by(user_id=current_user.id, device_type='camera').count()
+
+    # Get paginated devices
+    if current_user.is_admin:
+        devices_pagination = Device.query.paginate(page=page, per_page=per_page, error_out=False)
+    else:
+        devices_pagination = Device.query.filter_by(user_id=current_user.id).paginate(page=page, per_page=per_page, error_out=False)
     
-    # Get a dictionary of usernames for all device owners
-    user_ids = {device.user_id for device in devices}
+    devices = devices_pagination.items
+
+    # Get usernames for all device owners
+    user_ids = {device.user_id for device in devices_pagination.items}
     users = User.query.filter(User.id.in_(user_ids)).all()
     user_dict = {user.id: user.username for user in users}
     
     return render_template('dashboard.html', 
-                         devices=devices, 
-                         user_dict=user_dict, 
+                         devices=devices,
+                         pagination=devices_pagination,
+                         total_devices=total_devices,
+                         total_active=total_active,
+                         total_cameras=total_cameras,
+                         user_dict=user_dict,
                          current_user=current_user)
 
 class AddServerForm(FlaskForm):
@@ -305,19 +327,34 @@ def edit_device(device_id):
 @app.route('/activity-history')
 @login_required
 def activity_history():
-    activities = Activity.query.order_by(Activity.timestamp.desc()).all()
-    return render_template('activity_history.html', activities=activities)
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+
+    if current_user.is_admin:
+        activities_pagination = Activity.query.order_by(Activity.timestamp.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    else:
+        activities_pagination = Activity.query.filter_by(user_id=current_user.id).order_by(Activity.timestamp.desc()).paginate(page=page, per_page=per_page, error_out=False)
+
+    return render_template('activity_history.html', 
+                         activities=activities_pagination.items,
+                         pagination=activities_pagination)
 
 # User Management Routes
 @app.route('/users')
 @login_required
-def manage_users():
+def users():
     if not current_user.is_admin:
         flash('Access denied. Admin privileges required.', 'error')
         return redirect(url_for('dashboard'))
-    users = User.query.all()
-    form = FlaskForm()  # Create a form instance for CSRF token
-    return render_template('users.html', users=users, form=form)
+    
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    users_pagination = User.query.paginate(page=page, per_page=per_page, error_out=False)
+    
+    return render_template('users.html', 
+                         users=users_pagination.items,
+                         pagination=users_pagination,
+                         form=FlaskForm())  # For CSRF token
 
 @app.route('/users/add', methods=['POST'])
 @login_required
@@ -331,7 +368,7 @@ def add_user():
     
     if User.query.filter_by(username=username).first():
         flash('Username already exists', 'error')
-        return redirect(url_for('manage_users'))
+        return redirect(url_for('users'))
     
     new_user = User(username=username, email=email)
     new_user.set_password(password)
@@ -339,7 +376,7 @@ def add_user():
     db.session.commit()
     log_activity(current_user, f"Added user {new_user.username}")
     flash('User added successfully', 'success')
-    return redirect(url_for('manage_users'))
+    return redirect(url_for('users'))
 
 @app.route('/users/<int:user_id>', methods=['DELETE'])
 @login_required
@@ -370,7 +407,7 @@ def reset_user_password():
     db.session.commit()
     log_activity(current_user, f"Reset password for user {user.username}")
     flash('Password reset successfully', 'success')
-    return redirect(url_for('manage_users'))
+    return redirect(url_for('users'))
 
 if __name__ == '__main__':
     init_db()
