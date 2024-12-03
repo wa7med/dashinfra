@@ -116,11 +116,20 @@
             padding: 20px;
         }
 
+        .dark-theme .devices-section {
+            background: #2d3436;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
         .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+        }
+
+        .dark-theme .section-header h2 {
+            color: #ecf0f1;
         }
 
         .add-device-btn {
@@ -137,6 +146,8 @@
 
         .add-device-btn:hover {
             background-color: #45a049;
+            color: white;
+            text-decoration: none;
         }
 
         .devices-table-wrapper {
@@ -159,14 +170,29 @@
             border-bottom: 2px solid #dee2e6;
         }
 
+        .dark-theme .devices-table th {
+            background-color: #343a40;
+            color: #ecf0f1;
+            border-bottom: 2px solid #495057;
+        }
+
         .devices-table td {
             padding: 12px;
             border-bottom: 1px solid #dee2e6;
             vertical-align: middle;
         }
 
+        .dark-theme .devices-table td {
+            border-bottom: 1px solid #495057;
+            color: #ecf0f1;
+        }
+
         .devices-table tbody tr:hover {
             background-color: #f8f9fa;
+        }
+
+        .dark-theme .devices-table tbody tr:hover {
+            background-color: #343a40;
         }
 
         .device-name {
@@ -175,8 +201,8 @@
             gap: 8px;
         }
 
-        .device-icon {
-            color: #6c757d;
+        .dark-theme .device-icon {
+            color: #b2bec3;
         }
 
         .device-type {
@@ -186,24 +212,28 @@
             font-weight: 500;
         }
 
-        .device-type.server {
-            background-color: #e3f2fd;
-            color: #1976d2;
+        .dark-theme .device-type.server {
+            background-color: #1a4971;
+            color: #90caf9;
         }
 
-        .device-type.camera {
-            background-color: #fce4ec;
-            color: #c2185b;
+        .dark-theme .device-type.camera {
+            background-color: #731c3e;
+            color: #f48fb1;
         }
 
-        .device-type.device {
-            background-color: #f3e5f5;
-            color: #7b1fa2;
+        .dark-theme .device-type.device {
+            background-color: #4a1564;
+            color: #ce93d8;
         }
 
         .ip-address {
             font-family: monospace;
             color: #495057;
+        }
+
+        .dark-theme .ip-address {
+            color: #b2bec3;
         }
 
         .status-badge {
@@ -215,18 +245,14 @@
             font-size: 0.85em;
         }
 
-        .status-badge.active {
-            background-color: #e8f5e9;
-            color: #2e7d32;
+        .dark-theme .status-badge.active {
+            background-color: #1b5e20;
+            color: #a5d6a7;
         }
 
-        .status-badge.inactive {
-            background-color: #fafafa;
-            color: #616161;
-        }
-
-        .status-badge i {
-            font-size: 0.8em;
+        .dark-theme .status-badge.inactive {
+            background-color: #424242;
+            color: #bdbdbd;
         }
 
         .description-cell {
@@ -234,6 +260,31 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+
+        .dark-theme .description-cell {
+            color: #b2bec3;
+        }
+
+        .owner-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .dark-theme .owner-badge {
+            background-color: #343a40;
+            color: #b2bec3;
+        }
+
+        .dark-theme .owner-badge.owner-self {
+            background-color: #4e342e;
+            color: #ffcc80;
         }
 
         .actions {
@@ -249,36 +300,20 @@
             color: #6c757d;
         }
 
+        .dark-theme .icon-btn {
+            color: #b2bec3;
+        }
+
         .icon-btn:hover {
             transform: scale(1.1);
         }
 
-        .edit-btn:hover {
-            color: #007bff;
+        .dark-theme .edit-btn:hover {
+            color: #64b5f6;
         }
 
-        .delete-btn:hover {
-            color: #dc3545;
-        }
-
-        .owner-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.85em;
-            background-color: #f8f9fa;
-            color: #6c757d;
-        }
-
-        .owner-badge.owner-self {
-            background-color: #fff3e0;
-            color: #e65100;
-        }
-
-        .owner-badge i {
-            font-size: 0.8em;
+        .dark-theme .delete-btn:hover {
+            color: #ef5350;
         }
 
         @media (max-width: 768px) {
