@@ -228,11 +228,17 @@ def change_password():
 @app.route('/logout')
 @login_required
 def logout():
+    # Remove the remember me cookie
+    session.pop('remember_token', None)
+    # Logout the user
     logout_user()
-    # Clear session
+    # Clear all session data
     session.clear()
+    # Remove any remember cookies
     flash('You have been logged out.', 'info')
-    return redirect(url_for('login'))
+    response = redirect(url_for('login'))
+    response.delete_cookie('remember_token')
+    return response
 
 @app.route('/edit-device/<int:device_id>', methods=['GET', 'POST'])
 @login_required
