@@ -127,6 +127,53 @@ function initializeSearch() {
     }
 }
 
+// User Management Functions
+function deleteUser(userId) {
+    if (confirm('Are you sure you want to delete this user?')) {
+        fetch(`/delete-user/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showAlert(data.error, 'error');
+            } else {
+                showAlert('User deleted successfully', 'success');
+                // Reload the page to update the user list
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            showAlert('Error deleting user', 'error');
+            console.error('Error:', error);
+        });
+    }
+}
+
+function showAlert(message, category) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${category} alert-dismissible fade show`;
+    alertDiv.role = 'alert';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    const contentDiv = document.getElementById('content');
+    contentDiv.insertBefore(alertDiv, contentDiv.firstChild);
+    
+    // Auto-dismiss success messages after 5 seconds
+    if (category === 'success') {
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+}
+
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize theme
@@ -209,4 +256,18 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Form submitted with data:', data);
         });
     }
+
+    // Add click event listeners to all close buttons in alerts
+    document.querySelectorAll('.alert .btn-close').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.alert').remove();
+        });
+    });
+    
+    // Auto-dismiss success messages
+    document.querySelectorAll('.alert-success').forEach(alert => {
+        setTimeout(() => {
+            alert.remove();
+        }, 5000);
+    });
 });

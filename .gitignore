@@ -57,3 +57,5 @@ redis_data/
 
 # Data directories
 data/
+data/postgres/
+data/dev/

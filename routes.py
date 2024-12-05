@@ -6,6 +6,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, TextAreaField, SelectField
 from wtforms.validators import DataRequired
 from forms import UserForm  
+import re
+from sqlalchemy.exc import SQLAlchemyError
 
 class AddServerForm(FlaskForm):
     server_name = StringField('Server Name', validators=[DataRequired()], name='server-name')
@@ -65,17 +67,16 @@ def register_routes(app):
         if request.method == 'POST':
             username = request.form.get('username')
             password = request.form.get('password')
-            remember = request.form.get('remember', False)
             
             user = User.query.filter_by(username=username).first()
             
             if user and user.check_password(password):
-                login_user(user, remember=remember)
+                login_user(user)
                 log_activity(user, 'User logged in')
                 next_page = request.args.get('next')
                 return redirect(next_page or url_for('dashboard'))
             
-            flash('Invalid username or password')
+            flash('Invalid username or password', 'error')
         
         return render_template('login.html')
 
@@ -86,6 +87,7 @@ def register_routes(app):
             log_activity(current_user, 'User logged out')
         logout_user()
         session.clear()
+        flash('Successfully logged out', 'success')
         return redirect(url_for('login'))
 
     # User profile routes
@@ -105,17 +107,17 @@ def register_routes(app):
         confirm_password = request.form.get('confirm_password')
 
         if not current_user.check_password(current_password):
-            flash('Current password is incorrect')
+            flash('Current password is incorrect', 'error')
             return redirect(url_for('profile'))
 
         if new_password != confirm_password:
-            flash('New passwords do not match')
+            flash('New passwords do not match', 'error')
             return redirect(url_for('profile'))
 
         current_user.set_password(new_password)
         db.session.commit()
         log_activity(current_user, 'Changed password')
-        flash('Password updated successfully')
+        flash('Password updated successfully', 'success')
         return redirect(url_for('profile'))
 
     # Device management routes
@@ -157,7 +159,7 @@ def register_routes(app):
     def delete_device(device_id):
         device = Device.query.get_or_404(device_id)
         if not current_user.is_admin and device.user_id != current_user.id:
-            flash('Unauthorized access')
+            flash('Unauthorized access', 'error')
             return redirect(url_for('dashboard'))
         
         device_name = device.name
@@ -165,7 +167,7 @@ def register_routes(app):
         db.session.delete(device)
         db.session.commit()
         log_activity(current_user, f'Deleted {device_type}: {device_name}')
-        flash(f'{device_type.capitalize()} deleted successfully')
+        flash(f'{device_type.capitalize()} deleted successfully', 'success')
         return redirect(url_for('dashboard'))
 
     @app.route('/edit-device/<int:device_id>', methods=['GET', 'POST'])
@@ -173,7 +175,7 @@ def register_routes(app):
     def edit_device(device_id):
         device = Device.query.get_or_404(device_id)
         if not current_user.is_admin and device.user_id != current_user.id:
-            flash('Unauthorized access')
+            flash('Unauthorized access', 'error')
             return redirect(url_for('dashboard'))
 
         if request.method == 'POST':
@@ -188,7 +190,7 @@ def register_routes(app):
             
             db.session.commit()
             log_activity(current_user, f'Updated {device.device_type}: {device.name}')
-            flash(f'{device.device_type.capitalize()} updated successfully')
+            flash(f'{device.device_type.capitalize()} updated successfully', 'success')
             return redirect(url_for('dashboard'))
         
         return render_template('edit_device.html', device=device)
@@ -198,7 +200,7 @@ def register_routes(app):
     @login_required
     def users():
         if not current_user.is_admin:
-            flash('Unauthorized access')
+            flash('Unauthorized access', 'error')
             return redirect(url_for('dashboard'))
         
         users = User.query.all()
@@ -212,26 +214,62 @@ def register_routes(app):
             flash('Unauthorized access', 'error')
             return redirect(url_for('users'))
         
-        username = request.form.get('username')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        is_admin = request.form.get('is_admin') == 'true'
-        
-        if User.query.filter_by(username=username).first():
-            flash('Username already exists', 'error')
-            return redirect(url_for('users'))
-        
-        if not email:
-            flash('Email is required', 'error')
-            return redirect(url_for('users'))
+        try:
+            # Get form data
+            username = request.form.get('username', '').strip()
+            email = request.form.get('email', '').strip()
+            password = request.form.get('password')
+            is_admin = request.form.get('is_admin') == 'true'
             
-        user = User(username=username, email=email, is_admin=is_admin)
-        user.set_password(password)
-        db.session.add(user)
-        db.session.commit()
-        log_activity(current_user, f'Created new user: {username}')
+            # Validate required fields
+            if not all([username, email, password]):
+                flash('All fields are required', 'error')
+                return redirect(url_for('users'))
+            
+            # Validate email format
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                flash('Invalid email format', 'error')
+                return redirect(url_for('users'))
+            
+            # Check username length
+            if len(username) < 3:
+                flash('Username must be at least 3 characters long', 'error')
+                return redirect(url_for('users'))
+            
+            # Check password length
+            if len(password) < 6:
+                flash('Password must be at least 6 characters long', 'error')
+                return redirect(url_for('users'))
+            
+            # Check for existing username
+            if User.query.filter_by(username=username).first():
+                flash('Username already exists', 'error')
+                return redirect(url_for('users'))
+            
+            # Check for existing email
+            if User.query.filter_by(email=email).first():
+                flash('Email address already exists', 'error')
+                return redirect(url_for('users'))
+            
+            # Create new user
+            user = User(username=username, email=email, is_admin=is_admin)
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            
+            # Log activity and show success message
+            log_activity(current_user, f'Created new user: {username}')
+            flash('User created successfully', 'success')
+            
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            flash('Database error occurred. Please try again.', 'error')
+            app.logger.error(f'Database error in add_user: {str(e)}')
+        except Exception as e:
+            db.session.rollback()
+            flash('An unexpected error occurred', 'error')
+            app.logger.error(f'Unexpected error in add_user: {str(e)}')
         
-        flash('User created successfully', 'success')
         return redirect(url_for('users'))
 
     @app.route('/delete-user/<int:user_id>', methods=['POST'])
@@ -240,16 +278,31 @@ def register_routes(app):
         if not current_user.is_admin:
             return jsonify({'error': 'Unauthorized'}), 403
         
-        user = User.query.get_or_404(user_id)
-        if user.id == current_user.id:
-            return jsonify({'error': 'Cannot delete yourself'}), 400
-        
-        username = user.username
-        db.session.delete(user)
-        db.session.commit()
-        log_activity(current_user, f'Deleted user: {username}')
-        
-        return jsonify({'message': 'User deleted successfully'})
+        try:
+            user = User.query.get_or_404(user_id)
+            
+            # Prevent self-deletion
+            if user.id == current_user.id:
+                return jsonify({'error': 'Cannot delete your own account'}), 400
+            
+            # Prevent deletion of super admin
+            if user.username == 'admin':
+                return jsonify({'error': 'Cannot delete super admin account'}), 400
+            
+            username = user.username
+            db.session.delete(user)
+            db.session.commit()
+            
+            log_activity(current_user, f'Deleted user: {username}')
+            return jsonify({'message': 'User deleted successfully'})
+            
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            app.logger.error(f'Database error in delete_user: {str(e)}')
+            return jsonify({'error': 'Database error occurred'}), 500
+        except Exception as e:
+            app.logger.error(f'Unexpected error in delete_user: {str(e)}')
+            return jsonify({'error': 'An unexpected error occurred'}), 500
 
     @app.route('/reset-user-password', methods=['POST'])
     @login_required
@@ -265,7 +318,8 @@ def register_routes(app):
         db.session.commit()
         log_activity(current_user, f'Reset password for user: {user.username}')
         
-        return jsonify({'message': 'Password reset successfully'})
+        flash('Password reset successfully', 'success')
+        return redirect(url_for('users'))
 
     # Activity monitoring routes
     @app.route('/activity-history')

@@ -2,6 +2,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from flask import current_app
+from sqlalchemy import text
 
 db = SQLAlchemy()
 
@@ -55,3 +57,12 @@ class Activity(db.Model):
 
     def __repr__(self):
         return f'<Activity {self.action}>'
+
+def check_db_connection():
+    try:
+        # Use SQLAlchemy text() for raw SQL
+        result = db.session.execute(text('SELECT 1'))
+        return True
+    except Exception as e:
+        current_app.logger.error(f"Database connection error: {str(e)}")
+        return False
