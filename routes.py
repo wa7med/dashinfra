@@ -34,21 +34,12 @@ def register_routes(app):
         per_page = 10
 
         # Get total counts (not paginated)
-        if current_user.is_admin:
-            total_devices = Device.query.filter_by(device_type='server').count()
-            total_active = Device.query.filter_by(status='active').count()
-            total_cameras = Device.query.filter_by(device_type='camera').count()
-        else:
-            total_devices = Device.query.filter_by(user_id=current_user.id, device_type='server').count()
-            total_active = Device.query.filter_by(user_id=current_user.id, status='active').count()
-            total_cameras = Device.query.filter_by(user_id=current_user.id, device_type='camera').count()
+        total_devices = Device.query.filter_by(device_type='server').count()
+        total_active = Device.query.filter_by(status='active').count()
+        total_cameras = Device.query.filter_by(device_type='camera').count()
 
-        # Get paginated devices
-        if current_user.is_admin:
-            devices_pagination = Device.query.paginate(page=page, per_page=per_page, error_out=False)
-        else:
-            devices_pagination = Device.query.filter_by(user_id=current_user.id).paginate(page=page, per_page=per_page, error_out=False)
-        
+        # Get paginated devices - show all devices to everyone
+        devices_pagination = Device.query.paginate(page=page, per_page=per_page, error_out=False)
         devices = devices_pagination.items
 
         # Get usernames for all device owners
