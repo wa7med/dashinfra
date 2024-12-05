@@ -46,9 +46,9 @@ Required environment variables in .env:
 - WSGI Server: Gunicorn
 - Container: Docker
 
-## Production Deployment
+## Deployment Features
 
-The production setup uses:
+The Deployment setup uses:
 - Multi-stage Docker builds
 - Non-root user for security
 - Health checks for all services
