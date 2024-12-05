@@ -77,7 +77,6 @@ services:
 
 Now your PostgreSQL data will be stored in the local `data/postgres` directory and will persist even when running `docker-compose down -v`.
 
-**Note**: If you're using `docker-compose-dev.yml`, follow the same steps but create the directory as `data/dev/postgres` instead.
 
 ## Contributing
 
