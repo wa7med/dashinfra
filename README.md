@@ -1,31 +1,24 @@
-# DashInfra
+# Test Lab Infrastructure Dashboard
 
-A modern web-based dashboard for managing devices and servers, built with Flask and PostgreSQL.
+A modern web-based dashboard for managing test lab infrastructure and devices, built with Flask and PostgreSQL.
 
 ## Features
 
 - User Authentication and Authorization
-- Device Management System
+- Test Lab Inventory Management
 - Real-time Activity Monitoring
+- Redis Caching System
 - Responsive Design
 - Dark/Light Theme Support
 - Pagination Support
 - Secure Password Management
 - Docker Support
 
-## Quick Start (Production)
+## Quick Start
 
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/dashinfra.git
-cd dashinfra
-```
+1. Ensure Docker is installed on your system
 
-2. Create a .env file:
-```bash
-cp .env.example .env
-# Edit .env with your configurations
-```
+2. Copy docker-compose.yml to your deployment directory
 
 3. Start the application:
 ```bash
@@ -33,16 +26,6 @@ docker-compose up -d
 ```
 
 The application will be available at http://localhost:80
-
-## Development Setup
-
-For development, use the development compose file:
-
-```bash
-docker-compose -f docker-compose-dev.yml up --build
-```
-
-The development server will be available at http://localhost:5000
 
 ## Environment Variables
 
