@@ -108,18 +108,20 @@
     <div class="modal-content">
         <div class="modal-header">
             <h2>Reset Password</h2>
-            <span class="close" onclick="document.getElementById('resetPasswordModal').style.display='none'">&times;</span>
+            <span class="close" onclick="closeResetPasswordModal()">&times;</span>
         </div>
         <form id="resetPasswordForm" action="{{ url_for('reset_user_password') }}" method="POST">
-            {{ form.csrf_token }}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="user_id" id="resetPasswordUserId">
             <div class="form-group">
-                <label>New Password</label>
-                <input type="password" name="new_password" required>
+                <label for="new_password">New Password</label>
+                <input type="password" id="new_password" name="new_password" class="form-control" 
+                       required minlength="6" placeholder="Enter new password">
+                <small class="form-text text-muted">Password must be at least 6 characters long</small>
             </div>
             <div class="modal-footer">
-                <button type="button" class="cancel-btn" onclick="document.getElementById('resetPasswordModal').style.display='none'">Cancel</button>
-                <button type="submit" class="action-btn">Reset Password</button>
+                <button type="button" class="btn btn-secondary" onclick="closeResetPasswordModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Reset Password</button>
             </div>
         </form>
     </div>
@@ -152,6 +154,10 @@ function deleteUser(userId) {
 function openResetPasswordModal(userId) {
     document.getElementById('resetPasswordUserId').value = userId;
     document.getElementById('resetPasswordModal').style.display = 'block';
+}
+
+function closeResetPasswordModal() {
+    document.getElementById('resetPasswordModal').style.display = 'none';
 }
 
 // Close modal when clicking outside
@@ -203,23 +209,22 @@ window.onclick = function(event) {
 .modal {
     display: none;
     position: fixed;
-    top: 0;
+    z-index: 1000;
     left: 0;
+    top: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    background-color: rgba(0,0,0,0.5);
 }
 
 .modal-content {
-    background: var(--card-bg);
-    border-radius: 10px;
-    width: 90%;
-    max-width: 500px;
-    margin: 50px auto;
-    position: relative;
+    background-color: var(--background-color);
+    margin: 15% auto;
     padding: 20px;
-    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    width: 80%;
+    max-width: 500px;
 }
 
 .modal-header {
@@ -230,9 +235,14 @@ window.onclick = function(event) {
 }
 
 .close {
-    font-size: 24px;
+    color: var(--text-color);
+    font-size: 28px;
+    font-weight: bold;
     cursor: pointer;
-    color: var(--text-secondary);
+}
+
+.close:hover {
+    color: var(--primary-color);
 }
 
 .form-group {
@@ -241,17 +251,21 @@ window.onclick = function(event) {
 
 .form-group label {
     display: block;
-    margin-bottom: 8px;
-    color: var(--text-primary);
+    margin-bottom: 5px;
 }
 
 .form-group input {
     width: 100%;
     padding: 8px;
     border: 1px solid var(--border-color);
-    border-radius: 5px;
-    background: var(--input-bg);
-    color: var(--text-primary);
+    border-radius: 4px;
+    background-color: var(--input-background);
+    color: var(--text-color);
+}
+
+.form-text {
+    font-size: 0.875em;
+    color: var(--text-muted);
 }
 
 .modal-footer {

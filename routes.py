@@ -99,26 +99,51 @@ def register_routes(app):
                                  .limit(10).all()
         return render_template('profile.html', activities=activities)
 
-    @app.route('/change-password', methods=['POST'])
+    @app.route('/change-password', methods=['GET', 'POST'])
     @login_required
     def change_password():
-        current_password = request.form.get('current_password')
-        new_password = request.form.get('new_password')
-        confirm_password = request.form.get('confirm_password')
-
-        if not current_user.check_password(current_password):
-            flash('Current password is incorrect', 'error')
-            return redirect(url_for('profile'))
-
-        if new_password != confirm_password:
-            flash('New passwords do not match', 'error')
-            return redirect(url_for('profile'))
-
-        current_user.set_password(new_password)
-        db.session.commit()
-        log_activity(current_user, 'Changed password')
-        flash('Password updated successfully', 'success')
-        return redirect(url_for('profile'))
+        if request.method == 'GET':
+            return render_template('change_password.html')
+        
+        try:
+            current_password = request.form.get('current_password')
+            new_password = request.form.get('new_password')
+            confirm_password = request.form.get('confirm_password')
+            
+            # Validate inputs
+            if not all([current_password, new_password, confirm_password]):
+                flash('All fields are required', 'error')
+                return redirect(url_for('change_password'))
+            
+            # Verify current password
+            if not current_user.check_password(current_password):
+                flash('Current password is incorrect', 'error')
+                return redirect(url_for('change_password'))
+            
+            # Check new password length
+            if len(new_password) < 6:
+                flash('New password must be at least 6 characters long', 'error')
+                return redirect(url_for('change_password'))
+            
+            # Check if passwords match
+            if new_password != confirm_password:
+                flash('New passwords do not match', 'error')
+                return redirect(url_for('change_password'))
+            
+            # Update password
+            current_user.set_password(new_password)
+            db.session.commit()
+            
+            # Log activity
+            log_activity(current_user, 'Changed password')
+            flash('Password changed successfully', 'success')
+            return redirect(url_for('dashboard'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash('An error occurred. Please try again.', 'error')
+            app.logger.error(f'Error in change_password: {str(e)}')
+            return redirect(url_for('change_password'))
 
     # Device management routes
     @app.route('/add-server', methods=['GET', 'POST'])
@@ -154,46 +179,49 @@ def register_routes(app):
                 return render_template('add_server.html', form=form)
         return render_template('add_server.html', form=form)
 
-    @app.route('/delete-device/<int:device_id>', methods=['POST'])
-    @login_required
-    def delete_device(device_id):
-        device = Device.query.get_or_404(device_id)
-        if not current_user.is_admin and device.user_id != current_user.id:
-            flash('Unauthorized access', 'error')
-            return redirect(url_for('dashboard'))
-        
-        device_name = device.name
-        device_type = device.device_type
-        db.session.delete(device)
-        db.session.commit()
-        log_activity(current_user, f'Deleted {device_type}: {device_name}')
-        flash(f'{device_type.capitalize()} deleted successfully', 'success')
-        return redirect(url_for('dashboard'))
-
     @app.route('/edit-device/<int:device_id>', methods=['GET', 'POST'])
     @login_required
     def edit_device(device_id):
         device = Device.query.get_or_404(device_id)
-        if not current_user.is_admin and device.user_id != current_user.id:
-            flash('Unauthorized access', 'error')
-            return redirect(url_for('dashboard'))
-
+        
         if request.method == 'POST':
-            device.name = request.form.get('name')
-            device.ip_address = request.form.get('ip_address')
-            device.username = request.form.get('username')
-            device.description = request.form.get('description')
-            
-            new_password = request.form.get('password')
-            if new_password:
-                device.set_password(new_password)
-            
-            db.session.commit()
-            log_activity(current_user, f'Updated {device.device_type}: {device.name}')
-            flash(f'{device.device_type.capitalize()} updated successfully', 'success')
-            return redirect(url_for('dashboard'))
+            try:
+                device.name = request.form.get('name')
+                device.ip_address = request.form.get('ip_address')
+                device.username = request.form.get('username')
+                password = request.form.get('password')
+                if password:  # Only update password if provided
+                    device.password = password
+                device.description = request.form.get('description')
+                
+                db.session.commit()
+                log_activity(current_user, f'Updated device {device.name}')
+                flash('Device updated successfully', 'success')
+                return redirect(url_for('dashboard'))
+            except SQLAlchemyError as e:
+                db.session.rollback()
+                flash('Error updating device. Please try again.', 'error')
+                app.logger.error(f'Error updating device: {str(e)}')
         
         return render_template('edit_device.html', device=device)
+
+    @app.route('/delete-device/<int:device_id>', methods=['POST'])
+    @login_required
+    def delete_device(device_id):
+        try:
+            device = Device.query.get_or_404(device_id)
+            device_name = device.name
+            db.session.delete(device)
+            db.session.commit()
+            log_activity(current_user, f'Deleted device {device_name}')
+            return jsonify({
+                'message': 'Device deleted successfully',
+                'redirect': url_for('dashboard')
+            })
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            app.logger.error(f'Error deleting device: {str(e)}')
+            return jsonify({'error': 'Error deleting device'}), 500
 
     # User management routes (admin only)
     @app.route('/users')
@@ -304,21 +332,50 @@ def register_routes(app):
             app.logger.error(f'Unexpected error in delete_user: {str(e)}')
             return jsonify({'error': 'An unexpected error occurred'}), 500
 
-    @app.route('/reset-user-password', methods=['POST'])
+    @app.route('/reset-user-password', methods=['GET', 'POST'])
     @login_required
     def reset_user_password():
         if not current_user.is_admin:
             return jsonify({'error': 'Unauthorized'}), 403
         
-        user_id = request.form.get('user_id')
-        new_password = request.form.get('new_password')
+        try:
+            user_id = request.form.get('user_id')
+            new_password = request.form.get('new_password')
+            
+            # Validate inputs
+            if not all([user_id, new_password]):
+                flash('Password is required', 'error')
+                return redirect(url_for('users'))
+            
+            # Validate password length
+            if len(new_password) < 6:
+                flash('Password must be at least 6 characters long', 'error')
+                return redirect(url_for('users'))
+            
+            # Get user and validate
+            user = User.query.get_or_404(user_id)
+            
+            # Prevent resetting admin password if not admin
+            if user.username == 'admin' and current_user.username != 'admin':
+                flash('Cannot reset admin password', 'error')
+                return redirect(url_for('users'))
+            
+            # Update password
+            user.set_password(new_password)
+            db.session.commit()
+            
+            # Log activity
+            log_activity(current_user, f'Reset password for user: {user.username}')
+            flash('Password reset successfully', 'success')
+            
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            flash('Database error occurred. Please try again.', 'error')
+            app.logger.error(f'Database error in reset_user_password: {str(e)}')
+        except Exception as e:
+            flash('An unexpected error occurred', 'error')
+            app.logger.error(f'Unexpected error in reset_user_password: {str(e)}')
         
-        user = User.query.get_or_404(user_id)
-        user.set_password(new_password)
-        db.session.commit()
-        log_activity(current_user, f'Reset password for user: {user.username}')
-        
-        flash('Password reset successfully', 'success')
         return redirect(url_for('users'))
 
     # Activity monitoring routes

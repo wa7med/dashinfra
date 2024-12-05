@@ -128,6 +128,35 @@ function initializeSearch() {
 }
 
 // User Management Functions
+function openResetPasswordModal(userId) {
+    const modal = document.getElementById('resetPasswordModal');
+    const userIdInput = document.getElementById('resetPasswordUserId');
+    if (modal && userIdInput) {
+        userIdInput.value = userId;
+        modal.style.display = 'block';
+    }
+}
+
+function closeResetPasswordModal() {
+    const modal = document.getElementById('resetPasswordModal');
+    if (modal) {
+        modal.style.display = 'none';
+        // Clear the password field
+        const passwordInput = modal.querySelector('input[name="new_password"]');
+        if (passwordInput) {
+            passwordInput.value = '';
+        }
+    }
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    const modal = document.getElementById('resetPasswordModal');
+    if (event.target == modal) {
+        closeResetPasswordModal();
+    }
+}
+
 function deleteUser(userId) {
     if (confirm('Are you sure you want to delete this user?')) {
         fetch(`/delete-user/${userId}`, {
@@ -172,6 +201,40 @@ function showAlert(message, category) {
             alertDiv.remove();
         }, 5000);
     }
+}
+
+// Device Management Functions
+function deleteDevice(deviceId) {
+    if (confirm('Are you sure you want to delete this device?')) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        
+        fetch(`/delete-device/${deviceId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                showAlert(data.error, 'error');
+            } else {
+                showAlert(data.message, 'success');
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Error deleting device', 'error');
+        });
+    }
+}
+
+function editDevice(deviceId) {
+    window.location.href = `/edit-device/${deviceId}`;
 }
 
 // Event Listeners
