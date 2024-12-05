@@ -54,3 +54,8 @@ Thumbs.db
 # Development specific
 postgres_data/
 redis_data/
+
+# Data directories
+data/
+data/postgres/
+data/dev/

@@ -56,6 +56,29 @@ The Deployment setup uses:
 - Redis for caching
 - PostgreSQL for data persistence
 
+## Data Persistence
+
+By default, the PostgreSQL data is stored in a Docker volume. While this works, the data will be lost if you run `docker-compose down -v`. To make your data truly persistent, follow these steps:
+
+1. Create a local data directory:
+```bash
+mkdir -p data/postgres
+```
+
+2. Modify the `volumes` section in your `docker-compose.yml` for the `db` service:
+```yaml
+services:
+  db:
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data  # Changed from postgres_data:/var/lib/postgresql/data
+```
+
+3. Remove the `volumes` section at the bottom of the file that defines `postgres_data`.
+
+Now your PostgreSQL data will be stored in the local `data/postgres` directory and will persist even when running `docker-compose down -v`.
+
+**Note**: If you're using `docker-compose-dev.yml`, follow the same steps but create the directory as `data/dev/postgres` instead.
+
 ## Contributing
 
 1. Fork the repository
