@@ -201,11 +201,7 @@ window.onclick = function(event) {
     color: var(--text-primary);
 }
 
-.actions {
-    display: flex;
-    gap: 8px;
-}
-
+/* Modal Styles */
 .modal {
     display: none;
     position: fixed;
@@ -214,31 +210,47 @@ window.onclick = function(event) {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
 }
 
 .modal-content {
-    background-color: var(--background-color);
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-    width: 80%;
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    margin: 10% auto;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
     max-width: 500px;
+    position: relative;
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 24px;
 }
 
 .close {
-    color: var(--text-color);
+    color: var(--text-secondary);
     font-size: 28px;
     font-weight: bold;
     cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    line-height: 1;
 }
 
 .close:hover {
@@ -251,71 +263,112 @@ window.onclick = function(event) {
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    font-weight: 500;
 }
 
-.form-group input {
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"] {
     width: 100%;
-    padding: 8px;
+    padding: 12px 15px;
     border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background-color: var(--input-background);
-    color: var(--text-color);
+    border-radius: 8px;
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 14px;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.form-text {
-    font-size: 0.875em;
-    color: var(--text-muted);
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+}
+
+.form-group input::placeholder {
+    color: var(--text-secondary);
 }
 
 .modal-footer {
+    margin-top: 25px;
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
+    gap: 12px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--hover-color);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background-color: var(--hover-bg);
 }
 
 .action-btn {
-    background: var(--primary-color);
+    background-color: var(--primary-color);
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 5px;
+    padding: 10px 20px;
+    border-radius: 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
+    font-weight: 500;
+    transition: background-color 0.3s;
 }
 
-.cancel-btn {
-    background: var(--secondary-color);
-    color: white;
+.action-btn:hover {
+    background-color: var(--hover-color);
+}
+
+.icon-btn {
+    background: none;
     border: none;
-    padding: 8px 16px;
-    border-radius: 5px;
+    color: var(--text-primary);
     cursor: pointer;
+    padding: 4px;
+    transition: color 0.3s;
 }
 
-.delete-btn {
+.icon-btn:hover {
+    color: var(--primary-color);
+}
+
+.delete-btn:hover {
     color: var(--danger-color);
 }
 
-.alert {
-    padding: 12px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-}
-
-.alert-success {
-    background: var(--success-bg);
-    color: var(--success-color);
-    border: 1px solid var(--success-border);
-}
-
-.alert-error {
-    background: var(--danger-bg);
-    color: var(--danger-color);
-    border: 1px solid var(--danger-border);
+.form-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 6px;
 }
 </style>
 {% endblock %}
