@@ -1,5 +1,5 @@
 # Build stage
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 # Set working directory
 WORKDIR /app
@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     postgresql-client \
     libpq5 \
+    redis-tools \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy wheels from builder
@@ -43,6 +44,9 @@ RUN pip install --no-cache /wheels/*
 # Copy application code
 COPY . .
 RUN chown -R appuser:appuser /app
+
+# Create entrypoint script
+COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/
 
 # Switch to non-root user
 USER appuser
@@ -59,10 +63,6 @@ EXPOSE 5000
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5000/health || exit 1
-
-# Create entrypoint script
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--threads", "2", "--timeout", "60", "app:create_app()"]

@@ -2,10 +2,8 @@ version: '3.8'
 
 services:
   web:
-    build: .
+    image: wa7med/dashinfra:1.1
     restart: unless-stopped
-    ports:
-      - "5000:5000"
     environment:
       - FLASK_APP=app.py
       - FLASK_ENV=production
@@ -16,17 +14,21 @@ services:
       - DATABASE_URL=postgresql://postgres:password@db:5432/dashinfra
       - REDIS_URL=redis://redis:6379/0
     depends_on:
-      - db
-      - redis
-    volumes:
-      - ./:/app
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "80:5000"
     networks:
       - app-network
+    command: ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--worker-class", "gthread", "app:create_app()"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
 
   db:
     image: postgres:13
@@ -41,27 +43,35 @@ services:
       - app-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
+      interval: 5s
+      timeout: 3s
       retries: 5
+      start_period: 10s
+    command: postgres -c 'max_connections=200'
+    ports:
+      - "5432:5432"
 
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    command: redis-server --appendonly yes
     volumes:
       - redis_data:/data
     networks:
       - app-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-
-volumes:
-  postgres_data:
-  redis_data:
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    ports:
+      - "6379:6379"
 
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

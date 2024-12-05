@@ -24,10 +24,12 @@ wait_for_redis() {
 # Initialize the application
 init_app() {
     echo "Running database migrations..."
-    flask db upgrade
+    flask db stamp head 2>/dev/null || true
+    flask db migrate 2>/dev/null || true
+    flask db upgrade 2>/dev/null || true
     
     echo "Creating admin user if not exists..."
-    flask create-admin
+    flask create-admin admin@example.com
     
     echo "Initialization completed successfully!"
 }
@@ -43,4 +45,4 @@ wait_for_redis
 init_app
 
 echo "Starting application..."
-exec "$@"
+exec gunicorn --bind 0.0.0.0:5000 --workers 4 --worker-class gthread --threads 2 "app:create_app()"

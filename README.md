@@ -1,4 +1,4 @@
-# 2048 Web Dashboard
+# DashInfra
 
 A modern web-based dashboard for managing devices and servers, built with Flask and PostgreSQL.
 
@@ -13,19 +13,12 @@ A modern web-based dashboard for managing devices and servers, built with Flask 
 - Secure Password Management
 - Docker Support
 
-## Prerequisites
-
-- Docker and Docker Compose
-- PostgreSQL 13+
-- Python 3.11+
-- Redis (optional, for caching)
-
-## Quick Start with Docker
+## Quick Start (Production)
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/2048-dashboard.git
-cd 2048-dashboard
+git clone https://github.com/yourusername/dashinfra.git
+cd dashinfra
 ```
 
 2. Create a .env file:
@@ -34,59 +27,51 @@ cp .env.example .env
 # Edit .env with your configurations
 ```
 
-3. Build and run with Docker Compose:
+3. Start the application:
 ```bash
-docker-compose up --build
+docker-compose up -d
 ```
 
-The application will be available at http://localhost:5000
+The application will be available at http://localhost:80
 
-## Manual Installation
+## Development Setup
 
-1. Create a virtual environment:
+For development, use the development compose file:
+
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+docker-compose -f docker-compose-dev.yml up --build
 ```
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-3. Set up the database:
-```bash
-flask db upgrade
-```
-
-4. Run the application:
-```bash
-flask run
-```
+The development server will be available at http://localhost:5000
 
 ## Environment Variables
 
+Required environment variables in .env:
 - `FLASK_APP`: Application entry point
 - `FLASK_ENV`: Environment (development/production)
 - `DATABASE_URL`: PostgreSQL connection string
 - `SECRET_KEY`: Flask secret key
-- `REDIS_URL`: Redis connection string (optional)
-- `MAIL_SERVER`: SMTP server for emails
-- `MAIL_PORT`: SMTP port
-- `MAIL_USERNAME`: SMTP username
-- `MAIL_PASSWORD`: SMTP password
+- `REDIS_URL`: Redis connection string
 
-## Docker Deployment
+## Architecture
 
-1. Build the image:
-```bash
-docker build -t yourusername/2048-dashboard:latest .
-```
+- Backend: Flask (Python)
+- Database: PostgreSQL
+- Cache: Redis
+- Authentication: Flask-Login
+- ORM: SQLAlchemy
+- WSGI Server: Gunicorn
+- Container: Docker
 
-2. Push to Docker Hub:
-```bash
-docker push yourusername/2048-dashboard:latest
-```
+## Production Deployment
+
+The production setup uses:
+- Multi-stage Docker builds
+- Non-root user for security
+- Health checks for all services
+- Gunicorn as WSGI server
+- Redis for caching
+- PostgreSQL for data persistence
 
 ## Contributing
 
@@ -99,15 +84,3 @@ docker push yourusername/2048-dashboard:latest
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Security
-
-- All passwords are hashed using strong algorithms
-- CSRF protection enabled
-- Input validation and sanitization
-- Secure session management
-- Environment variable management for sensitive data
-
-## Support
-
-For support, please open an issue in the GitHub repository.

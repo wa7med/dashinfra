@@ -38,13 +38,19 @@ ENV/
 # Environment variables
 .env
 .env.local
+.env.development
 
 # Logs
 *.log
 
 # Docker
 .docker/
+docker-compose-dev.yml
 
 # System Files
 .DS_Store
 Thumbs.db
+
+# Development specific
+postgres_data/
+redis_data/
